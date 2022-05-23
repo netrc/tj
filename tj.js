@@ -42,11 +42,9 @@ const addJ = async l => {
 }
 
 const addT = async l => {
-//  const projTodo = await dyn.getProjFilesInfo( 'tProj' )
-//  console.dir(projTodo)
 console.log('---------------')
   const rl = await dyn.list().catch( fatalErr )
-  const projDone = await dyn.findFile( rl, rl.root_file_id,['Projects', 'tProj'], 'Done' )
+  const projDone = await dyn.findFile( rl, rl.root_file_id,['Projects', 'tProj'], 'Todo' )
   console.dir(projDone)
   const doneContent = await dyn.t.get(projDone.id).catch( fatalErr )
   console.dir(doneContent)

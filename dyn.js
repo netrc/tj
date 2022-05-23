@@ -81,7 +81,7 @@ const findFile = ( rl, rootId, dirList, fName ) => { // console.log('findFile', 
 }
 
 
-// use find file inside of getFileInfo,  and instead of getProjFilesInfo
+// use find file inside of getFileInfo
 const getFileInfoOrCreate = async (fname, pname) => {
   const rj = await list().catch( throwErr )
   const f = searchFileList(rj, fname)
@@ -118,29 +118,6 @@ const getFileInfoOrCreate = async (fname, pname) => {
     return [f2[0]]
   } else
     throw `createFile fail - thought we made ${fname} under ${pname}:${p[0].id} but now cant find it`
-}
-
-const getProjFilesInfo = async ( pname ) => {
-  const rj = await list().catch( throwErr )
-  const f = searchFileList(rj, 'Projects', 'folder')
-  if (f.length == 0) {
-    console.error('cant find Projects')
-    process.exit(1)
-  }
-  console.dir(f[0])
-  //const childFiles = searchIDList(rj,f[0].children)
-  const childFiles = mapChildrenToFilesList(rj,f[0].children)
-  console.dir(childFiles)
-  const pfiles = searchFileList(childFiles, 'tProj', 'folder')
-//console.dir(pfiles)
-  // assuming 2
-  const r = {}
-  pfiles[0].children.forEach( cid => {
-    const f = searchIDList( rj, cid )
-    const f0 = f[0]
-    r[f0.title] = f0.id
-  } )
-  return r
 }
 
 ////////////////////////////////////////
@@ -185,6 +162,6 @@ t.get = async (tid) => {
 
 
 module.exports = {
-  list, get, change, create, searchFileList, getFileInfo, findFile, getFileInfoOrCreate, getProjFilesInfo, tf, j, t
+  list, get, change, create, searchFileList, getFileInfo, findFile, getFileInfoOrCreate, tf, j, t
 }
 
