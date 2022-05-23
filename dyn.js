@@ -137,14 +137,16 @@ tf.italic = s => `__${s}__`
 
 // j helpers
 const j = {}
-j.insert = async (jid, l) => {
+j.insert = async (jid, l, parentId="root", isCheckbox=false, isChecked=false) => {
   const changesBody = {
     file_id: jid,
     changes: [ { 
       action: "insert", 
-      parent_id: "root", 
+      parent_id: parentId,
       index: 0, 
-      content: l 
+      content: l,
+      checkbox: isCheckbox,
+      checked: isChecked
     } ]
   }
   const r2 = await change( changesBody ).catch( throwErr )

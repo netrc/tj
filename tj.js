@@ -47,7 +47,12 @@ console.log('---------------')
   const projDone = await dyn.findFile( rl, rl.root_file_id,['Projects', 'tProj'], 'Todo' )
   console.dir(projDone)
   const doneContent = await dyn.t.get(projDone.id).catch( fatalErr )
-  console.dir(doneContent)
+//  console.dir(doneContent)
+  const currentNode = doneContent.nodes.filter( n => n.content=="CURRENT" )
+  console.dir(currentNode)
+  const makeCheckbox = true
+  const dontCheck = false
+  const r = await dyn.j.insert( projDone.id, l, currentNode[0].id, makeCheckbox, dontCheck ).catch( fatalErr )
 }
 
 const argsToText = a => a['_'].slice(1).join(' ')
