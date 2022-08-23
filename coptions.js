@@ -14,7 +14,7 @@ const parseAndDo = commands => {
     boolean: commandKeys
   }
   var av = require('minimist')(process.argv.slice(2),opts)
-  console.log(av)
+  //console.log(av)
 
   if ( ! commandKeys.map(k => av[k]).some(x => x) ) { // must have one of the command keys
     console.error(`at least one of ${commandKeys.map(c => `-${c}`).join(', ')}`)
@@ -28,7 +28,7 @@ const parseAndDo = commands => {
         comm = commands[c][av._[0]] // oh, this subcommand
         av._.shift()
       }
-      console.log('doing ',c,' : ', comm, av._)
+      //console.log('doing ',c,' : ', comm, av._)
       av.restOfString = av._.join(' ')
       comm(av)
     }
