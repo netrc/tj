@@ -66,22 +66,28 @@ const mapChildrenToFilesList = (rl,ca) => {   // so we match the list API
 // main funcs to do things for tj
 //
 
+// rl starts as list of all folders/docs in dynalist
 const findFile = ( rl, rootId, dirList, fName ) => { // console.log('findFile', rootId)
   if (dirList.length == 0) { // console.log('dirlist == 0,  now check for', fName)
-    const thisEntry = searchFileList( rl, fName)[0]
+    //console.log('findFile, dirList done..., fName: ', fName)
+    //console.dir(rl)
+    const root = searchIDList(rl, rootId)[0]    // console.dir(root)
+    const childFiles = mapChildrenToFilesList(rl, root.children) // console.dir(childFiles)
+    const thisEntry = searchFileList( childFiles, fName)[0]
     return thisEntry
   }
 
   // still traversing 'directories'
-  const root = searchIDList(rl, rootId)[0]    // console.dir(root)
-  const childFiles = mapChildrenToFilesList(rl, root.children) // console.dir(childFiles)
-  const thisPathName = dirList.shift()
-  const thisEntry = searchFileList( childFiles, thisPathName, 'folder')[0]
+  const root = searchIDList(rl, rootId)[0]    // get the root  // console.dir(root)
+  const childFiles = mapChildrenToFilesList(rl, root.children) // make new sublist of docs // console.dir(childFiles)
+  const thisPathName = dirList.shift() // no longer looking in first dir
+  const thisEntry = searchFileList( childFiles, thisPathName, 'folder')[0] // get current item name
+  // should this be 'rl' or childFiles?
   return findFile( rl, thisEntry.id, dirList, fName )
 }
 
 
-// use find file inside of getFileInfo
+// Todo: use find file inside of getFileInfo
 const getFileInfoOrCreate = async (fname, pname) => {
   const rj = await list().catch( throwErr )
   const f = searchFileList(rj, fname)
@@ -160,6 +166,20 @@ t.get = async (tid) => {
     }
   const r2 = await get( getBody ).catch( throwErr )
   return r2
+}
+t.insert = async (tid, l, parentId="root", isCheckbox=true, isChecked=false) => {
+  const changesBody = {
+    file_id: tid,
+    changes: [ { 
+      action: "insert", 
+      parent_id: parentId,
+      index: 0, 
+      content: l,
+      checkbox: isCheckbox,
+      checked: isChecked
+    } ]
+  }
+  const r2 = await change( changesBody ).catch( throwErr )
 }
 
 
