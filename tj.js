@@ -8,6 +8,7 @@ const Names = {
   ProjectFolder: 'Projects',
   TodoDocument: 'Todo',
   todoInsertNodeName: 'CURRENT',
+  DoneDocument: 'Done',
   currentProject: process.env.TJPROJ
 }
 if (!Names.currentProject) {
@@ -25,6 +26,7 @@ const j_add = async av => {
 }
 
 const t_add = async av => {
+  console.log('t_add: ', av.restOfString)
   const rl = await dyn.list().catch( u.fatalErr )
   const projTodo = await dyn.findFile( rl, rl.root_file_id,[Names.ProjectFolder, Names.currentProject], Names.TodoDocument )
   const todoContent = await dyn.t.get(projTodo.id).catch( u.fatalErr )
@@ -50,8 +52,62 @@ const t_listp = async av => {
   console.log(s)
 }
 
+const t_createp = async av => {
+  if (av._.length == 0) {
+    u.fatalErr('must specify project name')
+  }
+  const newpName = av._[0]
+  console.log(`doing t_listp: new project: ${newpName}`)
+  // !! projects must be unique across all dynalist folders !!!!
+  const newp = await dyn.getFileInfoOrCreate(newpName, Names.ProjectFolder, 'folder').catch( u.fatalErr )
+}
+
+const nToText = n => (n.checked ? 'DONE: ' : '      ') + n.content  // e.g. 'some todo item', or 'DONE: item thats done'
+
+const t_show = async av => {
+  // console.log(`doing t_show`)
+  // TODO: see t_done - common get Projects/TJPROJ/Todo  ; get current node
+  const rl = await dyn.list().catch( u.fatalErr )
+  const projTodo = await dyn.findFile( rl, rl.root_file_id,[Names.ProjectFolder, Names.currentProject], Names.TodoDocument )
+
+  const todoContent = await dyn.t.get(projTodo.id).catch( u.fatalErr )
+  //console.dir(todoContent) ; console.log('======================')
+  const todoNodeTitles = todoContent.nodes.reduce( (o,n) => {o[n.id] = nToText(n);return o}, {} ) // all the todo lines
+  //console.log(todoNodeTitles);  console.log('======================')
+
+  const currentNode = todoContent.nodes.filter( n => n.content==Names.todoInsertNodeName )[0]  // should be array size 1
+  //console.dir(currentNode); console.log('======================')
+  const s = currentNode.children.length==0 ? 'nothing CURRENT' : currentNode.children.map( c => todoNodeTitles[c] ).join('\n')
+  console.log(s)
+}
+
+const dyn_makeMove = ( n_id, newParent_id ) => return { 
+  action: move,
+  node_id: n_id,
+  parent_id: newParent_id,
+  index: 0
+}
+
+const t_done = async av => {
+  console.log(`doing t_done`)
+  // TODO: see t_done - common get Projects/TJPROJ/Todo  ; get current node
+  const rl = await dyn.list().catch( u.fatalErr )
+  const projTodo = await dyn.findFile( rl, rl.root_file_id,[Names.ProjectFolder, Names.currentProject], Names.TodoDocument )
+  const projDone = await dyn.findFile( rl, rl.root_file_id,[Names.ProjectFolder, Names.currentProject], Names.DoneDocument )
+  const todoContent = await dyn.t.get(projTodo.id).catch( u.fatalErr )
+  const todoNodeInfo = todoContent.nodes.reduce( (o,n) => {o[n.id] = n;return o}, {} ) // all the todo info
+  const currentNode = todoContent.nodes.filter( n => n.content==Names.todoInsertNodeName )[0]
+  const allDone = currentNode.children.map( c => todoNodeInfo[c] ).filter( n=> n.checked )
+  console.dir(allDone)
+
+  const changes = { }
+}
+
 module.exports = {
   j_add,
   t_add,
-  t_listp
+  t_listp,
+  t_show,
+  t_done,
+  t_createp
 }
