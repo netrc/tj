@@ -36,7 +36,7 @@ const commands = {
   },
   t: {
     _d: tj.t_add,
-    '@list': mkCLog('t list projects'),  // list projects
+    '@list': tj.t_listp,                // list projects
     '@show': mkCLog('t show current'),  // list current project todo
     '@set': mkCLog('t set project')     // set default project
   },

@@ -46,6 +46,7 @@ const create = dFetch(dFileEdit) // takes a body with file_id and others set
 
 const searchFileList = (rList, fname, type='document') => rList.files.filter( f => (f.title.substring(0,fname.length)==fname && f.type==type) )
 // or type=='folder'
+const searchFileListForFolders = (rList) => rList.files.filter( f => f.type=='folder')
 
 const searchIDList = (rList, id) => rList.files.filter( f => f.id==id )
 
@@ -184,6 +185,9 @@ t.insert = async (tid, l, parentId="root", isCheckbox=true, isChecked=false) => 
 
 
 module.exports = {
-  list, get, change, create, searchFileList, getFileInfo, findFile, getFileInfoOrCreate, tf, j, t
+  list, get, change, create, 
+  searchFileList, searchFileListForFolders, mapChildrenToFilesList, getFileInfo, findFile, getFileInfoOrCreate, 
+  tf, 
+  j, t
 }
 
