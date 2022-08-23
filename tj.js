@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 
-const y = require('yargs')
+
 const dyn = require('./dyn.js') // uses DYNALIST_API env var
 const u = require('./utils.js')
 
@@ -33,85 +33,81 @@ const fatalErr = err => {
   process.exit(1)
 }
 
+const Names = {
+  JournalFolder: 'Journal',
+  ProjectFolder: 'Projects',
+  TodoDocument: 'Todo',
+  todoInsertNodeName: 'CURRENT',
+  currentProject: process.env.TJPROJ
+}
+if (!Names.currentProject) {
+  fatalErr('must set env TJPROJ to current project name')
+}
+
 const addJ = async l => {
   const jm = u.journalMonth()
-  const journalInfo = await dyn.getFileInfoOrCreate(jm).catch( fatalErr )
+  //console.log(jm, Names.JournalFolder)
+  const journalInfo = await dyn.getFileInfoOrCreate(jm, Names.JournalFolder).catch( fatalErr )
   //console.log('---- journal info'); console.dir(journalInfo)
   const newContent = `${dyn.tf.code(u.isoTimestamp())} ${l}`
   const r = await dyn.j.insert( journalInfo[0].id, newContent ).catch( fatalErr )
 }
 
 const addT = async l => {
-console.log('---------------')
   const rl = await dyn.list().catch( fatalErr )
-  const projDone = await dyn.findFile( rl, rl.root_file_id,['Projects', 'tProj'], 'Todo' )
-  console.dir(projDone)
-  const doneContent = await dyn.t.get(projDone.id).catch( fatalErr )
-//  console.dir(doneContent)
-  const currentNode = doneContent.nodes.filter( n => n.content=="CURRENT" )
-  console.dir(currentNode)
+  const projTodo = await dyn.findFile( rl, rl.root_file_id,[Names.ProjectFolder, Names.currentProject], Names.TodoDocument )
+  const todoContent = await dyn.t.get(projTodo.id).catch( fatalErr )
+  const currentNode = todoContent.nodes.filter( n => n.content==Names.todoInsertNodeName ) 
   const makeCheckbox = true
   const dontCheck = false
-  const r = await dyn.j.insert( projDone.id, l, currentNode[0].id, makeCheckbox, dontCheck ).catch( fatalErr )
+  const r = await dyn.t.insert( projTodo.id, l, currentNode[0].id, makeCheckbox, dontCheck ).catch( fatalErr )
 }
 
-const argsToText = a => a['_'].slice(1).join(' ')
 
-const journalHandler = a => {
-  console.log('YARGS just journal handler')
-  //console.dir(a)  // { _: [ 'journal', 'someting' ], '$0': 'tj.js' }
-  const lineStr = argsToText(a)
-  addJ( lineStr )
+const journalHandler = av => {
+  //console.log('journal handler: ',av.restOfString)
+  addJ( av.restOfString )
 }
 const journalListHandler = a => {
-  console.log('YARGS journa list handler')
+  //console.log('journa list handler')
   console.dir(a)
 }
-const todoHandler = a => {
-  console.log('YARGS just todo handler')
-  console.dir(a)
-  //const projTodo = await dyn.getFileInfoOrCreate(jm).catch( fatalErr )
-  const lineStr = argsToText(a)
-  addT( lineStr )
+const todoHandler = av => {
+  //console.log('todo handler')
+  addT( av.restOfString )
 }
 const todoListHandler = a => {
-  console.log('YARGS todo lisat handler')
+  console.log('todo lisat handler')
   console.dir(a)
 }
 
-y.usage()
-  .version('a.b.c')
-  .command( {
-    command: 'journal',
-    alias: ['j'], // not working
-    description: 'do journal entries',
-    builder: (yargs) => { //console.log('builder journal!');
-      return yargs.command( {
-        command: "list",
-        description: "child command of foo",
-        builder: function() { // console.log("builder journal list!");
-        },
-        handler: journalListHandler
-        } )
-      },
-      handler: journalHandler
-    } )
-  .command( {
-    command: 'todo',
-    description: 'do todo entries',
-    builder: (yargs) => { //console.log('builder todos!');
-      return yargs.command( {
-        command: "list",
-        description: "child command of foo",
-        builder: function() { // console.log("builder journal list!");
-        },
-        handler: todoListHandler
-        } )
-      },
-      handler: todoHandler
-    } )
-  .demand(1, "must provide valid subcommand 'journal' or 'todo'")
-  .help("h")
-  .alias("h", "help")
-  .argv
+const doHelp = () => console.log(`
+${process.argv[1]} - tj project cli tool, linked to Dynalist
 
+-t text to add    - adds text to current project todo
+-t lsit - lists
+
+-j text to add 
+`)
+
+const mkCLog = s => () => console.log(s)
+
+const commands = {
+  j: {
+    _d: journalHandler,
+    list: journalListHandler   // list current day journal
+  },
+  t: {
+    _d: todoHandler,
+    listprojects: mkCLog('doTlistProjects'),  // list projects
+    lp: mkCLog('doTlistProjects'),  // list projects
+    list: mkCLog('dotlist'),  // list current project todo
+    set: mkCLog('doTset')     // set default project
+  },
+  h: {
+    _d: doHelp
+  }
+}
+
+const coptions = require('./coptions')
+coptions.parseAndDo(commands)
