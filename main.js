@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const u = require('./utils.js')
-const tj = require('./tj2.js')
+const tj = require('./tj.js')
 
 // commonly,
 // alias t="node /full/instal/path/tj -t"
