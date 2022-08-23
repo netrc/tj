@@ -1,4 +1,9 @@
 
+const fatalErr = err => {
+  console.error(err)
+  process.exit(1)
+}
+
 const zeroPre = n => (n<10) ? '0'+n : n
 
 const isoTimestamp = ( x=(new Date()) ) => {  // year-mm-ddThh:mm // no seconds
@@ -22,5 +27,7 @@ const projectFiles = ( p='tProj' ) => {
 }
   
 module.exports = {
-  isoTimestamp, journalMonth
+  fatalErr,
+  isoTimestamp, 
+  journalMonth
 }
