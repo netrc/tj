@@ -89,7 +89,7 @@ const findFile = ( rl, rootId, dirList, fName ) => { // console.log('findFile', 
 
 
 // Todo: use find file inside of getFileInfo
-const getFileInfoOrCreate = async (fname, pname) => {
+const getFileInfoOrCreate = async (fname, pname, ntype='document') => {
   const rj = await list().catch( throwErr )
   const f = searchFileList(rj, fname)
   //console.log(`gfioc: searching for ${fname}`); console.dir(f)
@@ -109,7 +109,7 @@ const getFileInfoOrCreate = async (fname, pname) => {
   const b = {
     changes: [ {
       action: 'create',
-      type: 'document',
+      type: ntype,   // 'document' or 'folder'
       parent_id: p[0].id,
       index: 0,
       title: fname
