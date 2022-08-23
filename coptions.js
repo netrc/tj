@@ -28,7 +28,7 @@ const parseAndDo = commands => {
         comm = commands[c][av._[0]] // oh, this subcommand
         av._.shift()
       }
-      //console.log('doing ',c,' : ', comm, av._)
+      //console.log('coptions doing ',c,' : ', comm, av._)
       av.restOfString = av._.join(' ')
       comm(av)
     }
