@@ -44,41 +44,23 @@ if (!Names.currentProject) {
   fatalErr('must set env TJPROJ to current project name')
 }
 
-const addJ = async l => {
+const j_add = async av => {
   const jm = u.journalMonth()
   //console.log(jm, Names.JournalFolder)
   const journalInfo = await dyn.getFileInfoOrCreate(jm, Names.JournalFolder).catch( fatalErr )
   //console.log('---- journal info'); console.dir(journalInfo)
-  const newContent = `${dyn.tf.code(u.isoTimestamp())} ${l}`
+  const newContent = `${dyn.tf.code(u.isoTimestamp())} ${av.restOfString}`
   const r = await dyn.j.insert( journalInfo[0].id, newContent ).catch( fatalErr )
 }
 
-const addT = async l => {
+const t_add = async av => {
   const rl = await dyn.list().catch( fatalErr )
   const projTodo = await dyn.findFile( rl, rl.root_file_id,[Names.ProjectFolder, Names.currentProject], Names.TodoDocument )
   const todoContent = await dyn.t.get(projTodo.id).catch( fatalErr )
   const currentNode = todoContent.nodes.filter( n => n.content==Names.todoInsertNodeName ) 
   const makeCheckbox = true
   const dontCheck = false
-  const r = await dyn.t.insert( projTodo.id, l, currentNode[0].id, makeCheckbox, dontCheck ).catch( fatalErr )
-}
-
-
-const journalHandler = av => {
-  //console.log('journal handler: ',av.restOfString)
-  addJ( av.restOfString )
-}
-const journalListHandler = a => {
-  //console.log('journa list handler')
-  console.dir(a)
-}
-const todoHandler = av => {
-  //console.log('todo handler')
-  addT( av.restOfString )
-}
-const todoListHandler = a => {
-  console.log('todo lisat handler')
-  console.dir(a)
+  const r = await dyn.t.insert( projTodo.id, av.restOfString, currentNode[0].id, makeCheckbox, dontCheck ).catch( fatalErr )
 }
 
 const doHelp = () => console.log(`
@@ -90,19 +72,18 @@ ${process.argv[1]} - tj project cli tool, linked to Dynalist
 -j text to add 
 `)
 
-const mkCLog = s => () => console.log(s)
+const mkCLog = s => () => console.log('dummy...',s) // for command placeholders
 
 const commands = {
   j: {
-    _d: journalHandler,
-    list: journalListHandler   // list current day journal
+    _d: j_add,
+    '@list': mkCLog('j list')   // list current day journal
   },
   t: {
-    _d: todoHandler,
-    listprojects: mkCLog('doTlistProjects'),  // list projects
-    lp: mkCLog('doTlistProjects'),  // list projects
-    list: mkCLog('dotlist'),  // list current project todo
-    set: mkCLog('doTset')     // set default project
+    _d: t_add,
+    '@list': mkCLog('t list projects'),  // list projects
+    '@show': mkCLog('t show current'),  // list current project todo
+    '@set': mkCLog('t set project')     // set default project
   },
   h: {
     _d: doHelp
