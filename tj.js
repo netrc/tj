@@ -7,7 +7,7 @@ const Names = {
   JournalFolder: 'Journal',
   ProjectFolder: 'Projects',
   TodoDocument: 'Todo',
-  todoInsertNodeName: 'CURRENT',
+  todoInsertNodeName: 'BACKLOG',  // was CURRENT
   DoneDocument: 'Done',
   currentProject: process.env.TJPROJ
 }
@@ -31,6 +31,9 @@ const t_add = async av => {
   const projTodo = await dyn.findFile( rl, rl.root_file_id,[Names.ProjectFolder, Names.currentProject], Names.TodoDocument )
   const todoContent = await dyn.t.get(projTodo.id).catch( u.fatalErr )
   const currentNode = todoContent.nodes.filter( n => n.content==Names.todoInsertNodeName ) 
+  if (currentNode.length==0) {
+    u.fatalErr(`can't find ${Names.todoInsertNodeName} node`)
+  }
   const makeCheckbox = true
   const dontCheck = false
   const r = await dyn.t.insert( projTodo.id, av.restOfString, currentNode[0].id, makeCheckbox, dontCheck ).catch( u.fatalErr )
@@ -81,12 +84,12 @@ const t_show = async av => {
   console.log(s)
 }
 
-const dyn_makeMove = ( n_id, newParent_id ) => return { 
+const dyn_makeMove = ( n_id, newParent_id ) => ({ 
   action: move,
   node_id: n_id,
   parent_id: newParent_id,
   index: 0
-}
+})
 
 const t_done = async av => {
   console.log(`doing t_done`)
