@@ -7,6 +7,7 @@ const Names = {
   JournalFolder: 'Journal',
   ProjectFolder: 'Projects',
   TodoDocument: 'Todo',
+  todoCurrentNodeName: 'CURRENT',
   todoInsertNodeName: 'BACKLOG',  // was CURRENT
   DoneDocument: 'Done',
   currentProject: process.env.TJPROJ
@@ -36,7 +37,8 @@ const t_add = async av => {
   }
   const makeCheckbox = true
   const dontCheck = false
-  const r = await dyn.t.insert( projTodo.id, av.restOfString, currentNode[0].id, makeCheckbox, dontCheck ).catch( u.fatalErr )
+  //const r = await dyn.t.insert( projTodo.id, av.restOfString, currentNode[0].id, makeCheckbox, dontCheck ).catch( u.fatalErr )
+  const r = await dyn.t.insertArray( projTodo.id, [av.restOfString], currentNode[0].id, makeCheckbox, dontCheck ).catch( u.fatalErr )
 }
 
 const t_listp = async av => {
@@ -66,6 +68,7 @@ const t_createp = async av => {
 }
 
 const nToText = n => (n.checked ? 'DONE: ' : '      ') + n.content  // e.g. 'some todo item', or 'DONE: item thats done'
+const nDoneToText = n => (n.checked ? n.content : null) // e.g. just the Done items
 
 const t_show = async av => {
   // console.log(`doing t_show`)
@@ -78,18 +81,11 @@ const t_show = async av => {
   const todoNodeTitles = todoContent.nodes.reduce( (o,n) => {o[n.id] = nToText(n);return o}, {} ) // all the todo lines
   //console.log(todoNodeTitles);  console.log('======================')
 
-  const currentNode = todoContent.nodes.filter( n => n.content==Names.todoInsertNodeName )[0]  // should be array size 1
+  const currentNode = todoContent.nodes.filter( n => n.content==Names.todoCurrentNodeName )[0]  // should be array sz 1
   //console.dir(currentNode); console.log('======================')
   const s = currentNode.children.length==0 ? 'nothing CURRENT' : currentNode.children.map( c => todoNodeTitles[c] ).join('\n')
   console.log(s)
 }
-
-const dyn_makeMove = ( n_id, newParent_id ) => ({ 
-  action: move,
-  node_id: n_id,
-  parent_id: newParent_id,
-  index: 0
-})
 
 const t_done = async av => {
   console.log(`doing t_done`)
@@ -99,11 +95,34 @@ const t_done = async av => {
   const projDone = await dyn.findFile( rl, rl.root_file_id,[Names.ProjectFolder, Names.currentProject], Names.DoneDocument )
   const todoContent = await dyn.t.get(projTodo.id).catch( u.fatalErr )
   const todoNodeInfo = todoContent.nodes.reduce( (o,n) => {o[n.id] = n;return o}, {} ) // all the todo info
-  const currentNode = todoContent.nodes.filter( n => n.content==Names.todoInsertNodeName )[0]
+  const currentNode = todoContent.nodes.filter( n => n.content==Names.todoCurrentNodeName )[0]
   const allDone = currentNode.children.map( c => todoNodeInfo[c] ).filter( n=> n.checked )
-  console.dir(allDone)
+  //console.dir(allDone)
 
-  const changes = { }
+  const doneContent = await dyn.t.get(projDone.id).catch( u.fatalErr )
+  console.log('....')
+  //console.dir(doneContent)
+  const doneRoot = doneContent.nodes.filter( n => n.id=='root' )[0] // 
+  let firstNode = doneContent.nodes.filter( n => n.id==doneRoot.children[0] )[0]
+  //console.dir(firstNode)
+  const ymdStr = u.ymdTimestamp()
+  if (!firstNode || firstNode.content != ymdStr) {
+    console.log('need to make node: ', ymdStr)
+    firstNode = await dyn.t.insert( doneContent.file_id, ymdStr, 'root', false ).catch( u.fatalErr )
+    //console.dir(firstNode)
+  }
+  const doneTitles = todoContent.nodes.map( n => nDoneToText(n) ).filter(x=>x) // just the DOne lines
+// use allDone titles
+console.log(doneTitles)
+  const r = await dyn.t.insertArray( doneContent.file_id, doneTitles, doneRoot.children[0], false, false, -1 )
+  console.dir(r)
+  if (r._code == 'Ok') {
+    // now delete the old ones
+    console.log('to be deleted')
+    console.dir(allDone)
+    const doneIds = allDone.map( d => d.id )
+    console.dir(doneIds)
+  }
 }
 
 module.exports = {
