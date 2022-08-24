@@ -26,6 +26,7 @@ const isoTimestamp = ( x=(new Date()) ) => {  // year-mm-ddThh:mm // no seconds
 
 module.exports = {
   fatalErr,
-  isoTimestamp, 
-  journalMonth
+  ymdTimestamp,
+  journalMonth,
+  isoTimestamp 
 }
