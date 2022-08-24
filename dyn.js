@@ -168,19 +168,34 @@ t.get = async (tid) => {
   const r2 = await get( getBody ).catch( throwErr )
   return r2
 }
-t.insert = async (tid, l, parentId="root", isCheckbox=true, isChecked=false) => {
+
+const makeChangeItem = (action, l, pid, isCheckbox, isChecked, index) => ({
+  action: "insert", 
+  parent_id: pid,
+  content: l,
+  checkbox: isCheckbox,
+  checked: isChecked,
+  index: index
+})
+
+t.insert = async (tid, l, parentId="root", isCheckbox=true, isChecked=false, index=0) => {
+  const changesArray = [ makeChangeItem( "insert", l, parentId, isCheckbox, isChecked, index) ]
   const changesBody = {
     file_id: tid,
-    changes: [ { 
-      action: "insert", 
-      parent_id: parentId,
-      index: 0, 
-      content: l,
-      checkbox: isCheckbox,
-      checked: isChecked
-    } ]
+    changes: changesArray
   }
   const r2 = await change( changesBody ).catch( throwErr )
+  return r2
+}
+
+t.insertArray = async (tid, lArray, parentId="root", isCheckbox=true, isChecked=false, index=0) => {
+  const changesArray = lArray.map( l => makeChangeItem("insert", l, parentId, isCheckbox, isChecked, index) )
+  const changesBody = {
+    file_id: tid,
+    changes: changesArray
+  }
+  const r2 = await change( changesBody ).catch( throwErr )
+  return r2
 }
 
 
