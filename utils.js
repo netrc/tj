@@ -24,14 +24,6 @@ const isoTimestamp = ( x=(new Date()) ) => {  // year-mm-ddThh:mm // no seconds
   return `${x.getFullYear()}-${zeroPre(m)}-${zeroPre(d)}T${xx.substring(16,21)}`
 }
 
-const projectFiles = ( p='tProj' ) => {
-  // read ~/.tj
-  return {
-    todo: 'Todo',
-    done: 'Done'
-  }
-}
-  
 module.exports = {
   fatalErr,
   isoTimestamp, 
