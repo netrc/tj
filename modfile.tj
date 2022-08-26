@@ -1,0 +1,9 @@
+#%Module
+
+set TJVER 1.0
+set MAIN /home/ric/src/tj/main.js
+
+# require unix or doppler ?
+
+set-alias j "doppler run -- node --no-warnings ${MAIN} -j"
+set-alias t "doppler run -- node --no-warnings ${MAIN} -t"
