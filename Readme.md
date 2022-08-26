@@ -32,3 +32,6 @@ DYNALIST_API - your dynalist API key (where to find this....)
 Note, j and t are aliases for node tj.js -j "$@" and node tj.js -t "$@"
 
 aliases
+
+alias j='doppler run -- node --no-warnings /home/ric/src/tj/main.js -j'
+alias t='doppler run -- node --no-warnings /home/ric/src/tj/main.js -t'
