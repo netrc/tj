@@ -27,7 +27,7 @@ const j_add = async av => {
 }
 
 const t_add = async av => {
-  console.log('t_add: ', av.restOfString)
+  //console.log('t_add: ', av.restOfString)
   const rl = await dyn.list().catch( u.fatalErr )
   const projTodo = await dyn.findFile( rl, rl.root_file_id,[Names.ProjectFolder, Names.currentProject], Names.TodoDocument )
   const todoContent = await dyn.t.get(projTodo.id).catch( u.fatalErr )
@@ -94,34 +94,41 @@ const t_done = async av => {
   const projTodo = await dyn.findFile( rl, rl.root_file_id,[Names.ProjectFolder, Names.currentProject], Names.TodoDocument )
   const projDone = await dyn.findFile( rl, rl.root_file_id,[Names.ProjectFolder, Names.currentProject], Names.DoneDocument )
   const todoContent = await dyn.t.get(projTodo.id).catch( u.fatalErr )
+  //console.dir(todoContent)
   const todoNodeInfo = todoContent.nodes.reduce( (o,n) => {o[n.id] = n;return o}, {} ) // all the todo info
   const currentNode = todoContent.nodes.filter( n => n.content==Names.todoCurrentNodeName )[0]
   const allDone = currentNode.children.map( c => todoNodeInfo[c] ).filter( n=> n.checked )
-  //console.dir(allDone)
+  if (allDone.length==0) {
+    console.log('nothing done')
+  } else {
+    //console.dir(allDone) // array of allDone items
 
-  const doneContent = await dyn.t.get(projDone.id).catch( u.fatalErr )
-  console.log('....')
-  //console.dir(doneContent)
-  const doneRoot = doneContent.nodes.filter( n => n.id=='root' )[0] // 
-  let firstNode = doneContent.nodes.filter( n => n.id==doneRoot.children[0] )[0]
-  //console.dir(firstNode)
-  const ymdStr = u.ymdTimestamp()
-  if (!firstNode || firstNode.content != ymdStr) {
-    console.log('need to make node: ', ymdStr)
-    firstNode = await dyn.t.insert( doneContent.file_id, ymdStr, 'root', false ).catch( u.fatalErr )
+    const doneContent = await dyn.t.get(projDone.id).catch( u.fatalErr )
+    console.log('....')
+    //console.dir(doneContent)
+    const doneRoot = doneContent.nodes.filter( n => n.id=='root' )[0] // 
+    let firstNode = doneContent.nodes.filter( n => n.id==doneRoot.children[0] )[0]
     //console.dir(firstNode)
-  }
-  const doneTitles = todoContent.nodes.map( n => nDoneToText(n) ).filter(x=>x) // just the DOne lines
-// use allDone titles
-console.log(doneTitles)
-  const r = await dyn.t.insertArray( doneContent.file_id, doneTitles, doneRoot.children[0], false, false, -1 )
-  console.dir(r)
-  if (r._code == 'Ok') {
-    // now delete the old ones
-    console.log('to be deleted')
-    console.dir(allDone)
-    const doneIds = allDone.map( d => d.id )
-    console.dir(doneIds)
+    const ymdStr = u.ymdTimestamp()
+    if (!firstNode || firstNode.content != ymdStr) {
+      console.log('need to make node: ', ymdStr)
+      firstNode = await dyn.t.insert( doneContent.file_id, ymdStr, 'root', false ).catch( u.fatalErr )
+      //console.dir(firstNode)
+    }
+    const doneTitles = todoContent.nodes.map( n => nDoneToText(n) ).filter(x=>x) // just the DOne lines
+    // use allDone titles
+    console.log(doneTitles)
+    const r = await dyn.t.insertArray( doneContent.file_id, doneTitles, doneRoot.children[0], false, false, -1 ).catch( u.fatalErr )
+    //console.dir(r)
+    if (r._code == 'Ok') {
+      // now delete the old ones
+      //console.log('to be deleted')
+      //console.dir(allDone)
+      const doneIds = allDone.map( d => d.id )
+      //console.dir(doneIds)
+      const r2 = await dyn.t.deleteArray( todoContent.file_id, doneIds ).catch( u.fatalErr )
+      //console.dir(r2)
+    }
   }
 }
 

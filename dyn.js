@@ -177,6 +177,10 @@ const makeChangeItem = (action, l, pid, isCheckbox, isChecked, index) => ({
   checked: isChecked,
   index: index
 })
+const makeDeleteItem = (id) => ({
+  action: "delete", 
+  node_id: id
+})
 
 t.insert = async (tid, l, parentId="root", isCheckbox=true, isChecked=false, index=0) => {
   const changesArray = [ makeChangeItem( "insert", l, parentId, isCheckbox, isChecked, index) ]
@@ -194,8 +198,19 @@ t.insertArray = async (tid, lArray, parentId="root", isCheckbox=true, isChecked=
     file_id: tid,
     changes: changesArray
   }
-  const r2 = await change( changesBody ).catch( throwErr )
-  return r2
+  const r = await change( changesBody ).catch( throwErr )
+  return r
+}
+
+t.deleteArray = async (fileId, idArray) => {
+  const deleteArray = idArray.map( i => makeDeleteItem(i) )
+  const changesBody = {
+    file_id: fileId,
+    changes: deleteArray
+  }
+console.dir(changesBody)
+  const r = await change( changesBody ).catch( throwErr )
+  return r
 }
 
 
