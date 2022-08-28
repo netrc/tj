@@ -6,6 +6,8 @@
 ///  ... 'all the rest of the line' are passed to -a
 ///  ... the '-a' command can have sub-commands, the first word after
 
+const l = require('./src/log.js')
+
 const parseAndDo = commands => {
   const commandKeys = Object.keys(commands)
 
@@ -28,7 +30,7 @@ const parseAndDo = commands => {
         comm = commands[c][av._[0]] // oh, this subcommand
         av._.shift()
       }
-      //console.log('coptions doing ',c,' : ', comm, av._)
+      l.info(`coptions: doing ${c}`)
       av.restOfString = av._.join(' ')
       comm(av)
     }
