@@ -2,8 +2,9 @@
 
 const dyn = require('./dyn.js') // uses DYNALIST_API env var
 const u = require('./utils.js')
+const l = require('./src/log.js')
 
-const Names = {
+const nameDefaults = { // defaults
   JournalFolder: 'Journal',
   ProjectFolder: 'Projects',
   TodoDocument: 'Todo',
@@ -12,9 +13,24 @@ const Names = {
   DoneDocument: 'Done',
   currentProject: process.env.TJPROJ
 }
-if (!Names.currentProject) {
-  u.fatalErr('must set env TJPROJ to current project name')
+let userDefaults = {}
+try {
+  userDefaults = require(`${process.env.HOME}/.tj.json`)
+} catch (e) {
+  if (e.code !== 'MODULE_NOT_FOUND') { // ignore if not found
+    throw e // most likely a json error in the file
+  } 
 }
+l.debug('userDefaults',userDefaults)
+const Names = { ...nameDefaults, ...userDefaults }
+l.debug('Names',Names)
+if (!Names.currentProject) {
+  u.fatalErr('must set ~/.tj.json "currentProject" or TJPROJ env to project name')
+}
+
+
+
+
 
 const j_add = async av => {
   const jm = u.journalMonth()
@@ -62,7 +78,7 @@ const t_createp = async av => {
     u.fatalErr('must specify project name')
   }
   const newpName = av._[0]
-  console.log(`doing t_listp: new project: ${newpName}`)
+  l.info(`doing t_listp: new project: ${newpName}`)
   // !! projects must be unique across all dynalist folders !!!!
   const newp = await dyn.getFileInfoOrCreate(newpName, Names.ProjectFolder, 'folder').catch( u.fatalErr )
 }
@@ -71,7 +87,7 @@ const nToText = n => (n.checked ? 'DONE: ' : '      ') + n.content  // e.g. 'som
 const nDoneToText = n => (n.checked ? n.content : null) // e.g. just the Done items
 
 const t_show = async av => {
-  // console.log(`doing t_show`)
+  l.info(`doing t_show`)
   // TODO: see t_done - common get Projects/TJPROJ/Todo  ; get current node
   const rl = await dyn.list().catch( u.fatalErr )
   const projTodo = await dyn.findFile( rl, rl.root_file_id,[Names.ProjectFolder, Names.currentProject], Names.TodoDocument )
@@ -88,7 +104,7 @@ const t_show = async av => {
 }
 
 const t_done = async av => {
-  console.log(`doing t_done`)
+  l.info(`doing t_done`)
   // TODO: see t_done - common get Projects/TJPROJ/Todo  ; get current node
   const rl = await dyn.list().catch( u.fatalErr )
   const projTodo = await dyn.findFile( rl, rl.root_file_id,[Names.ProjectFolder, Names.currentProject], Names.TodoDocument )
@@ -104,21 +120,21 @@ const t_done = async av => {
     //console.dir(allDone) // array of allDone items
 
     const doneContent = await dyn.t.get(projDone.id).catch( u.fatalErr )
-    console.log('....')
     //console.dir(doneContent)
     const doneRoot = doneContent.nodes.filter( n => n.id=='root' )[0] // 
     let firstNode = doneContent.nodes.filter( n => n.id==doneRoot.children[0] )[0]
     //console.dir(firstNode)
     const ymdStr = u.ymdTimestamp()
     if (!firstNode || firstNode.content != ymdStr) {
-      console.log('need to make node: ', ymdStr)
+      l.info('need to make date entry: ', ymdStr)
       firstNode = await dyn.t.insert( doneContent.file_id, ymdStr, 'root', false ).catch( u.fatalErr )
       //console.dir(firstNode)
     }
     const doneTitles = todoContent.nodes.map( n => nDoneToText(n) ).filter(x=>x) // just the DOne lines
     // use allDone titles
-    console.log(doneTitles)
-    const r = await dyn.t.insertArray( doneContent.file_id, doneTitles, doneRoot.children[0], false, false, -1 ).catch( u.fatalErr )
+    l.debug(doneTitles)
+    //const r = await dyn.t.insertArray( doneContent.file_id, doneTitles, doneRoot.children[0], false, false, -1 ).catch( u.fatalErr )
+    const r = await dyn.t.insertArray( doneContent.file_id, doneTitles, firstNode.id, false, false, -1 ).catch( u.fatalErr )
     //console.dir(r)
     if (r._code == 'Ok') {
       // now delete the old ones
