@@ -5,15 +5,12 @@
   "author": "https://github.com/netrc",
   "repository": "github:netrc/tj",
   "license": "MIT",
-
   "engines": {
     "node": ">=18.0.0"
   },
-  "scripts": {
-  },
-
-
+  "scripts": {},
   "dependencies": {
+    "@logtail/node": "^0.1.12",
     "minimist": "^1.2.6"
   }
 }
