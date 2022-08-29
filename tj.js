@@ -1,36 +1,9 @@
-#!/usr/bin/env node
+#!
 
 const dyn = require('./dyn.js') // uses DYNALIST_API env var
 const u = require('./utils.js')
 const l = require('./src/log.js')
-
-const nameDefaults = { // defaults
-  JournalFolder: 'Journal',
-  ProjectFolder: 'Projects',
-  TodoDocument: 'Todo',
-  todoCurrentNodeName: 'CURRENT',
-  todoInsertNodeName: 'BACKLOG',  // was CURRENT
-  DoneDocument: 'Done',
-  currentProject: process.env.TJPROJ
-}
-let userDefaults = {}
-try {
-  userDefaults = require(`${process.env.HOME}/.tj.json`)
-} catch (e) {
-  if (e.code !== 'MODULE_NOT_FOUND') { // ignore if not found
-    throw e // most likely a json error in the file
-  } 
-}
-l.debug('userDefaults',userDefaults)
-const Names = { ...nameDefaults, ...userDefaults }
-l.debug('Names',Names)
-if (!Names.currentProject) {
-  u.fatalErr('must set ~/.tj.json "currentProject" or TJPROJ env to project name')
-}
-
-
-
-
+const Names = require('./src/defaults.js')
 
 const j_add = async av => {
   const jm = u.journalMonth()
