@@ -24,9 +24,8 @@ if (!Names) {
       throw e // most likely a json error in the file
     } 
   }
-  l.debug('userDefaults',userDefaults)
   Names = { ...nameDefaults, ...userDefaults }
-  l.debug('Names',Names)
+  l.debug('defaults',{ userDefaults, Names })
   if (!Names.currentProject) {
     u.fatalErr('must set ~/.tj.json "currentProject" or TJPROJ env to project name')
   }
