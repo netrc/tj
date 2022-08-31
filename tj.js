@@ -6,6 +6,10 @@ const l = require('./src/log.js')
 const Names = require('./src/defaults.js')
 
 const j_add = async av => {
+  if (av.restOfString.length == 0) {
+    console.log('j: nothing to add')
+    return
+  }
   const jm = u.journalMonth()
   //console.log(jm, Names.JournalFolder)
   // TODO:  getFileInfoOrCreate - create what? folder or document
@@ -16,6 +20,10 @@ const j_add = async av => {
 }
 
 const t_add = async av => {
+  if (av.restOfString.length == 0) {
+    console.log('t: nothing to add')
+    return
+  }
   //console.log('t_add: ', av.restOfString)
   const rl = await dyn.list().catch( u.fatalErr )
   //console.log('t_add', Names)
