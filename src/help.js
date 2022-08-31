@@ -8,12 +8,13 @@ usage:
   tj -j @show [day|week|month] 
 
   tj -t with some text to insert a todo checkbox into current default project, BACKLOG
-  tj -t -p projName       // sets default in ~/.tj.json
-  tj -t -p projName with some text to insert a todo // also sets default
-  tj -t @names            // shows current project info, ~/.tj.json
+  tj -t -p projName       // TODO sets default in ~/.tj.json
+  tj -t -p projName with some text to insert a todo // TODO also sets default
+  tj -t @names            // TODO shows current project info, ~/.tj.json
+  tj -t @list            // lists all Projects names
   tj -t @create projName  
   tj -t @done             // move checked/done entries in CURRENT to Done document
-  tj -t @done a todo inserted with marked off checkbox // and then moved to Done
+  tj -t @done a todo inserted with marked off checkbox // TODO and then moved to Done
 
   tj -h // or -help or --help or -?, show help w/ version
 `
