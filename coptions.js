@@ -37,9 +37,6 @@ const parseAndDo = commands => {
   }) // or map commandKeys to array of funcs or nulls; and do first (only) func
 }
 
-const dummy = s => () => console.log('dummy...',s) // for command placeholders
-
 module.exports = {
-  parseAndDo,
-  dummy
+  parseAndDo
 }

@@ -19,6 +19,13 @@ const j_add = async av => {
   const r = await dyn.j.insert( journalInfo[0].id, newContent ).catch( u.fatalErr )
 }
 
+const j_copts = {
+  j: {
+    _d: j_add,
+    '@list': u.dummy('j list')   // list current day journal
+  }
+}
+
 const t_add = async av => {
   if (av.restOfString.length == 0) {
     console.log('t: nothing to add')
@@ -133,11 +140,19 @@ const t_done = async av => {
   }
 }
 
-module.exports = {
-  j_add,
-  t_add,
-  t_listp,
-  t_show,
-  t_done,
-  t_createp
+const t_copts = {
+  t: {
+    _d: t_add,
+    '@list': t_listp,                // list projects
+    '@create': t_createp,            // create a project
+    '@show': t_show,                 // show current project Current
+    '@done': t_done,                 // move done to Done
+    '@set': u.dummy('t set project')     // set default project
+  }
 }
+
+module.exports = {
+  j_copts,
+  t_copts
+}
+

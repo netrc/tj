@@ -24,9 +24,12 @@ const isoTimestamp = ( x=(new Date()) ) => {  // year-mm-ddThh:mm // no seconds
   return `${x.getFullYear()}-${zeroPre(m)}-${zeroPre(d)}T${xx.substring(16,21)}`
 }
 
+const dummy = s => () => console.log('dummy...',s) // for command placeholders
+
 module.exports = {
   fatalErr,
   ymdTimestamp,
   journalMonth,
-  isoTimestamp 
+  isoTimestamp,
+  dummy
 }

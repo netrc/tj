@@ -21,4 +21,12 @@ usage:
 
 const doHelp = () => console.log(helpStr)
 
-module.exports = doHelp
+const copts = { // command options
+  h: {
+    _d: doHelp
+  }
+}
+
+module.exports = {
+  copts
+}
