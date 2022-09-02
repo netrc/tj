@@ -4,7 +4,7 @@ const l = require('./src/log.js')
 const u = require('./utils.js')
 const tj = require('./tj.js')
 const help = require('./src/help.js')
-const coptions = require('./coptions')
+const coptions = require('./src/coptions')
 
 const commands = {
   ...tj.j_copts,
