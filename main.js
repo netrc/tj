@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const l = require('./src/log.js')
-const u = require('./utils.js')
+const u = require('./src/utils.js')
 const tj = require('./tj.js')
 const help = require('./src/help.js')
 const coptions = require('./src/coptions')

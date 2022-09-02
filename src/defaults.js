@@ -1,6 +1,6 @@
 
 
-const u = require('../utils.js')
+const u = require('./utils.js')
 const l = require('./log.js')
 
 const nameDefaults = { // real defaults
