@@ -2,13 +2,15 @@
 
 const l = require('./src/log.js')
 const u = require('./src/utils.js')
-const tj = require('./tj.js')
-const help = require('./src/help.js')
 const coptions = require('./src/coptions')
 
+const j = require('./src/journal.js')
+const t = require('./src/todo.js')
+const help = require('./src/help.js')
+
 const commands = {
-  ...tj.j_copts,
-  ...tj.t_copts,
+  ...j.j_copts,
+  ...t.t_copts,
   ...help.copts
 }
 
