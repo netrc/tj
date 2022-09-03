@@ -1,5 +1,5 @@
 
-const dyn = require('../dyn.js') // uses DYNALIST_API env var
+const dyn = require('./dyn.js') // uses DYNALIST_API env var
 const u = require('./utils.js')
 const l = require('./log.js')
 const Names = require('./defaults.js')
