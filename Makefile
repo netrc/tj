@@ -1,6 +1,9 @@
 
 main = ./main.js
 
+jest :
+	( cd test ; /home/ric/tmp/jest/2*/node_modules/.bin/jest utils.test.js )
+
 ttest :
 	doppler run -- node --no-warnings $(main) -t test\: make ttest
 
