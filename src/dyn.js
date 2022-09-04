@@ -51,9 +51,9 @@ const searchFileListForFolders = (rList) => rList.files.filter( f => f.type=='fo
 
 const searchIDList = (rList, id) => rList.files.filter( f => f.id==id )
 
-const getFileInfo = async fname => { // only searches for first name match
+const getFileInfo = async (fname, ntype) => { // only searches for first name match
   const rj = await list().catch( err => throwErr )
-  return searchFileList(rj, fname)
+  return searchFileList(rj, fname, ntype)
 }
 
 const mapChildrenToFilesList = (rl,ca) => {   // so we match the list API 
@@ -91,15 +91,15 @@ const findFile = ( rl, rootId, dirList, fName ) => { // console.log('findFile', 
 
 // Todo: use find file inside of getFileInfo
 const getFileInfoOrCreate = async (fname, pname, ntype='document') => {
-  const rj = await list().catch( throwErr )
-  const f = searchFileList(rj, fname)
+  const rl = await list().catch( throwErr )
+  const f = searchFileList(rl, fname, ntype)
   //console.log(`gfioc: searching for ${fname}`); console.dir(f)
   if (f.length>0) { // got it
     //console.log(`gfioc: ${fname} exists...done`)
     return [f[0]] // getFileInfo returns list
   } // could also check that p folder is correct
   // console.log(`gfioc: ${fname} does not exist...searching for folder ${pname}`)
-  const p = searchFileList(rj, pname, 'folder')
+  const p = searchFileList(rl, pname, 'folder')
   //console.log(`p.....`); console.dir(p)
   if (p.length == 0) {
     //console.log('gfioc: failed looking for folder ${pname}')
@@ -121,7 +121,8 @@ const getFileInfoOrCreate = async (fname, pname, ntype='document') => {
   if (r._code != "Ok")
     throw `createFile fail - couldnt create ${fname} under ${pname}:${p[0].id}`
   //console.log('gfioc: create return...'); console.dir(r)
-  const f2 = await getFileInfo(fname).catch( throwErr )
+  const f2 = await getFileInfo(fname, ntype).catch( throwErr )
+  //console.dir({m:'f2', f2})
   if (f2.length>0) { // got it
     return [f2[0]]
   } else
