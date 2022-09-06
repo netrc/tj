@@ -24,7 +24,8 @@ if (!Names) {
       throw e // most likely a json error in the file
     } 
   }
-  Names = { ...nameDefaults, ...userDefaults }
+  const envProj = process.env.TJPROJ ? { currentProject: process.env.TJPROJ } : {} 
+  Names = { ...nameDefaults, ...userDefaults, ...envProj }
   l.debug('defaults',{ userDefaults, Names })
   if (!Names.currentProject) {
     u.fatalErr('must set ~/.tj.json "currentProject" or TJPROJ env to project name')
