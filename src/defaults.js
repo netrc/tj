@@ -29,6 +29,11 @@ if (!Names) {
   if (!Names.currentProject) {
     u.fatalErr('must set ~/.tj.json "currentProject" or TJPROJ env to project name')
   }
+
+  Names.projTopPath = () => `/${Names.ProjectFolder}`
+  Names.projPath = (p = Names.currentProject) => `${Names.projTopPath()}/${p}`
+  Names.projTodoPath = p => `${Names.projPath(p)}/${Names.TodoDocument}`
+  Names.projDonePath = p => `${Names.projPath(p)}/${Names.DoneDocument}`
 }
 
 module.exports = Names
