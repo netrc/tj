@@ -9,13 +9,13 @@ const j_add = async av => {
     console.log('j: nothing to add')
     return
   }
-  const jm = u.journalMonth()
-  //console.log(jm, Names.JournalFolder)
-  // TODO:  getFileInfoOrCreate - create what? folder or document
-  const journalInfo = await dyn.getFileInfoOrCreate(jm, Names.JournalFolder).catch( u.fatalErr )
-  //console.log('---- journal info'); console.dir(journalInfo)
+  const all = await dyn.getAll().catch( u.fatalErr )
+  const jInfo = all.paths[Names.journalTopPath()] // must!? be there
+  const ymName = u.journalMonth()
+  const ymInfo = all.paths[Names.journalYMPath(ymName)] || null
+  const ymId = (ymInfo) ? ymInfo.id : await dyn.createItem(jInfo.id, ymName, 'folder').catch( u.fatalErr )
   const newContent = `${dyn.tf.code(u.isoTimestamp())} ${av.restOfString}`
-  const r = await dyn.j.insert( journalInfo[0].id, newContent ).catch( u.fatalErr )
+  const r = await dyn.j.insert( ymId, newContent ).catch( u.fatalErr )
 }
 
 const j_copts = {
@@ -28,4 +28,5 @@ const j_copts = {
 module.exports = {
   j_copts
 }
+
 
