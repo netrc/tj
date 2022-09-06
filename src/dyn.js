@@ -62,6 +62,55 @@ const mapChildrenToFilesList = (rl,ca) => {   // so we match the list API
   }
 }
 
+////////////////////////////////////////////////////
+// new stuff
+
+const _allFiles = {
+  ids: null,     // keys are id, vals are the info obj ( id, title, permissions, type, children )
+  paths: {}   // keys are full file 'pathname', vals are the info obj
+}
+
+const _pRecur = ( thisId, thisStr ) => {
+  _allFiles.paths[thisStr] = _allFiles.ids[thisId]
+  if ('children' in _allFiles.ids[thisId]) {
+    _allFiles.ids[thisId].children.forEach(c => _pRecur( c, thisStr+'/'+_allFiles.ids[c].title ))
+  }
+}
+  
+const getAll = async () => {
+  if (!_allFiles.ids) {
+    const rl = await list()
+    _allFiles.ids = rl.files.reduce( (a,c) => { a[c.id]=c; return a}, {} )
+    _pRecur( rl.root_file_id, '' )
+  }
+  return _allFiles
+}
+
+
+// or type=='folder'
+//const searchFileListForFolders = (rList) => rList.files.filter( f => f.type=='folder')
+
+//const searchIDList = (rList, id) => rList.files.filter( f => f.id==id )
+
+//const getFileInfo = async (fname, ntype) => { // only searches for first name match
+  //const rj = await list().catch( err => throwErr )
+  //return searchFileList(rj, fname, ntype)
+//}
+
+//const mapChildrenToFilesList = (rl,ca) => {   // so we match the list API 
+  //return { 
+    //files: ca.map( c => searchIDList(rl,c)[0] )
+  //}
+//}
+
+
+
+
+
+// new stuff
+////////////////////////////////////////////////////
+
+
 
 //////////////////////////////
 //
@@ -69,38 +118,52 @@ const mapChildrenToFilesList = (rl,ca) => {   // so we match the list API
 //
 
 // rl starts as list of all folders/docs in dynalist
-const findFile = ( rl, rootId, dirList, fName ) => { // console.log('findFile', rootId)
+const findFile = ( rl, rootId, pArray, fName, ntype ) => { // console.log('findFile', rootId)
+  const dirList = [...pArray] // don't be shifting pArray
   if (dirList.length == 0) { // console.log('dirlist == 0,  now check for', fName)
-    //console.log('findFile, dirList done..., fName: ', fName)
+    console.log('findFile, dirList done..., fName: ', fName)
     //console.dir(rl)
-    const root = searchIDList(rl, rootId)[0]    // console.dir(root)
+    const root = searchIDList(rl, rootId)[0]    
+//console.log('ff: rootId', rootId, ' root: ',root)
     const childFiles = mapChildrenToFilesList(rl, root.children) // console.dir(childFiles)
-    const thisEntry = searchFileList( childFiles, fName)[0]
+//console.log('ff: childFiles', childFiles)
+    const thisEntry = searchFileList( childFiles, fName, ntype)[0]
+console.log('ff: thisEntry', thisEntry)
     return thisEntry
   }
 
   // still traversing 'directories'
+//console.log('findFile', dirList, fName)
   const root = searchIDList(rl, rootId)[0]    // get the root  // console.dir(root)
   const childFiles = mapChildrenToFilesList(rl, root.children) // make new sublist of docs // console.dir(childFiles)
   const thisPathName = dirList.shift() // no longer looking in first dir
   const thisEntry = searchFileList( childFiles, thisPathName, 'folder')[0] // get current item name
+  if (!thisEntry) {
+    console.error('findFile ', fName, ' not found in ', thisPathName)
+    return null
+  }
+//console.log('ff: thisEntry: ', thisEntry)
   // should this be 'rl' or childFiles?
   return findFile( rl, thisEntry.id, dirList, fName )
 }
 
 
 // Todo: use find file inside of getFileInfo
-const getFileInfoOrCreate = async (fname, pname, ntype='document') => {
+const getFileInfoOrCreate = async (pArray, fname, ntype='document') => {
   const rl = await list().catch( throwErr )
-  const f = searchFileList(rl, fname, ntype)
-  //console.log(`gfioc: searching for ${fname}`); console.dir(f)
-  if (f.length>0) { // got it
-    //console.log(`gfioc: ${fname} exists...done`)
-    return [f[0]] // getFileInfo returns list
-  } // could also check that p folder is correct
-  // console.log(`gfioc: ${fname} does not exist...searching for folder ${pname}`)
-  const p = searchFileList(rl, pname, 'folder')
-  //console.log(`p.....`); console.dir(p)
+  const f = findFile(rl, rl.root_file_id, pArray, fname, ntype)
+  if (f) { // got it
+    // console.log(`gfioc: ${fname} exists...done`)
+    return f // getFileInfo returns list
+  } 
+console.log(`gfioc: ${pArray} ${fname} does not exist...searching for folder ${pArray}`)
+
+  const dName = pArray.pop()
+console.log('gfioc: trying to find parent folder ', dName, ' parray is now', pArray)
+  const d = findFile(rl, rl.root_file_id, pArray, dName,'folder')
+  console.log('d: ',d)
+
+return
   if (p.length == 0) {
     //console.log('gfioc: failed looking for folder ${pname}')
     throw `createFile fail ${pname} parent folder doesnt exist`
@@ -218,7 +281,7 @@ t.deleteArray = async (fileId, idArray) => {
 
 module.exports = {
   list, get, change, create, 
-  searchFileList, searchFileListForFolders, mapChildrenToFilesList, getFileInfo, findFile, getFileInfoOrCreate, 
+  getAll, searchFileList, searchFileListForFolders, mapChildrenToFilesList, getFileInfo, findFile, getFileInfoOrCreate, 
   tf, 
   j, t
 }
