@@ -9,10 +9,24 @@ const x_writeList = async av => {
   const rl = await dyn.list().catch( u.fatalErr )
   fs.writeFileSync('./rl.json', JSON.stringify(rl),null,2)
 }
+
+const x_content = async av => {
+  const all = await dyn.getAll().catch( u.fatalErr )
+  console.log('f: ', av.restOfString, all.paths[av.restOfString])
+  const fInfo = all.paths[av.restOfString]
+  const content = await dyn.get({file_id: fInfo.id}).catch( u.fatalErr )
+  console.log('content', content)
+}
+
+const x_names = async av => {
+  console.dir(Names)
+}
   
 const x_copts = {
   x: {
     _d: x_writeList,
+    '@content': x_content,
+    '@names': x_names,
     '@rl': x_writeList
   }
 }
