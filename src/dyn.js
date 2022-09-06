@@ -147,6 +147,26 @@ console.log('ff: thisEntry', thisEntry)
   return findFile( rl, thisEntry.id, dirList, fName )
 }
 
+const createItem = async (pId, name, ntype = 'document') => {
+  //TODO: make all the body creates funcs
+  const b = {
+    changes: [ {
+      action: 'create',
+      parent_id: pId,
+      type: ntype,   // 'document' or 'folder'
+      title: name,
+      index: 0
+    } ]
+  }
+  console.log(`createItem: creating for ${name}`,b)
+  const r = await create(b).catch( throwErr )
+  if (r._code != 'Ok') {
+    console.log(r)
+    u.fatalErr('failed to make ',name)
+  }
+  return r.created[0] // ? must have created one
+}
+
 
 // Todo: use find file inside of getFileInfo
 const getFileInfoOrCreate = async (pArray, fname, ntype='document') => {
@@ -169,18 +189,8 @@ return
     throw `createFile fail ${pname} parent folder doesnt exist`
   }
   //console.log(`gfioc: found folder ${pname}`)
-//TODO: make all the body creates funcs
-  const b = {
-    changes: [ {
-      action: 'create',
-      type: ntype,   // 'document' or 'folder'
-      parent_id: p[0].id,
-      index: 0,
-      title: fname
-    } ]
-  }
-  //console.log(`gfioc: creating for ${fname}`); console.dir(b)
-  const r = await create(b).catch( throwErr )
+
+  const r = await createItem(p[0].id,fname,ntype).catch( throwErr )
   if (r._code != "Ok")
     throw `createFile fail - couldnt create ${fname} under ${pname}:${p[0].id}`
   //console.log('gfioc: create return...'); console.dir(r)
@@ -281,7 +291,7 @@ t.deleteArray = async (fileId, idArray) => {
 
 module.exports = {
   list, get, change, create, 
-  getAll, searchFileList, searchFileListForFolders, mapChildrenToFilesList, getFileInfo, findFile, getFileInfoOrCreate, 
+  getAll, createItem, searchFileList, searchFileListForFolders, mapChildrenToFilesList, getFileInfo, findFile, getFileInfoOrCreate, 
   tf, 
   j, t
 }
