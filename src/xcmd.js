@@ -21,12 +21,17 @@ const x_content = async av => {
 const x_names = async av => {
   console.dir(Names)
 }
+
+const x_argv = async av => {
+  console.dir(av)
+}
   
 const x_copts = {
   x: {
     _d: x_writeList,
     '@content': x_content,
     '@names': x_names,
+    '@argv': x_argv,
     '@rl': x_writeList
   }
 }
