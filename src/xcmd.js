@@ -11,9 +11,8 @@ const x_writeList = async av => {
 }
 
 const x_content = async av => {
-  const all = await dyn.getAll().catch( u.fatalErr )
-  console.log('f: ', av.restOfString, all.paths[av.restOfString])
-  const fInfo = all.paths[av.restOfString]
+  const fInfo = await dyn.infoFromPath[av.restOfString]
+  console.log('f: ', av.restOfString, fInfo)
   const content = await dyn.get({file_id: fInfo.id}).catch( u.fatalErr )
   console.log('content', content)
 }

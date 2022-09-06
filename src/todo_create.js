@@ -41,12 +41,12 @@ const t_create = async av => {
   }
   const newpName = av._[0]
   l.info(`doing t_listp: new project: ${newpName}`)
-  const all = await dyn.getAll().catch( u.fatalErr )
-  if (all.paths[Names.projPath(newpName)]) {
-    u.fatalErr(`project ${newpName} already exists`)
+  const pInfo =  await dyn.infoFromPath(Names.projPath(newpName))
+  if (pInfo) {
+    u.fatalErr(`project ${Names.projPath(newpName)} already exists`)
   }
 
-  const projTop = all.paths[Names.projTopPath()]
+  const projTop = await dyn.infoFromPath(Names.projTopPath())
   const newpId = await dyn.createItem(projTop.id, newpName, 'folder').catch( u.fatalErr )
   const doneDocId = await dyn.createItem(newpId, Names.DoneDocument).catch( u.fatalErr )
   const todoDocId = await dyn.createItem(newpId, Names.TodoDocument).catch( u.fatalErr )

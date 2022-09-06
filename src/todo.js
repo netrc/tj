@@ -9,8 +9,7 @@ const t_add = async av => {
     console.log('t: nothing to add')
     return
   }
-  const all = await dyn.getAll().catch( u.fatalErr )
-  const thisProjTodo = all.paths[Names.projTodoPath()]
+  const thisProjTodo = await dyn.infoFromPath(Names.projTodoPath())
   // TODO if !thisProjTodo
   const todoContent = await dyn.t.get(thisProjTodo.id).catch( u.fatalErr )
   // TODO if !todoContent
@@ -25,13 +24,12 @@ const t_add = async av => {
 
 const t_listp = async av => {
   //console.log('doing t_listp')
-  const all = await dyn.getAll().catch( u.fatalErr )
-  const projFolder = all.paths[Names.projTopPath()] || null
+  const projFolder = await dyn.infoFromPath(Names.projTopPath())
   if (!projFolder) {
     u.fatalErr('cant find Projects folder')
   }
-  const projChildrenNodes = projFolder.children
-  const projects = projChildrenNodes.map( n => all.ids[n].title )
+  const projectsInfo = await dyn.infoFromIdArray( projFolder.children )
+  const projects = projectsInfo.map( i => i.title )
   const s = projects.length==0 ? 'no projects!' : projects.join('\n')
   console.log(s)
 }
@@ -42,8 +40,7 @@ const nDoneToText = n => (n.checked ? n.content : null) // e.g. just the Done it
 const t_show = async av => {
   l.info(`doing t_show`)
   // TODO: see t_done - common get Projects/TJPROJ/Todo  ; get current node
-  const all = await dyn.getAll().catch( u.fatalErr )
-  const thisProjTodo = all.paths[Names.projTodoPath()]
+  const thisProjTodo = await dyn.infoFromPath(Names.projTodoPath())
   const todoContent = await dyn.t.get(thisProjTodo.id).catch( u.fatalErr )
   //console.dir(todoContent) ; console.log('======================')
   const todoNodeTitles = todoContent.nodes.reduce( (o,n) => {o[n.id] = nToText(n);return o}, {} ) // all the todo lines
@@ -57,10 +54,8 @@ const t_show = async av => {
 
 const t_done = async av => {
   l.info(`doing t_done`)
-  // TODO: see t_done - common get Projects/TJPROJ/Todo  ; get current node
-  const rl = await dyn.list().catch( u.fatalErr )
-  const projTodo = await dyn.findFile( rl, rl.root_file_id,[Names.ProjectFolder, Names.currentProject], Names.TodoDocument )
-  const projDone = await dyn.findFile( rl, rl.root_file_id,[Names.ProjectFolder, Names.currentProject], Names.DoneDocument )
+  const projTodo = await dyn.infoFromPath(Names.projTodoPath())
+  const projDone = await dyn.infoFromPath(Names.projDonePath())
   const todoContent = await dyn.t.get(projTodo.id).catch( u.fatalErr )
   //console.dir(todoContent)
   const todoNodeInfo = todoContent.nodes.reduce( (o,n) => {o[n.id] = n;return o}, {} ) // all the todo info
@@ -70,7 +65,6 @@ const t_done = async av => {
     console.log('nothing done')
   } else {
     //console.dir(allDone) // array of allDone items
-
     const doneContent = await dyn.t.get(projDone.id).catch( u.fatalErr )
     //console.dir(doneContent)
     const doneRoot = doneContent.nodes.filter( n => n.id=='root' )[0] // 

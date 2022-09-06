@@ -58,13 +58,29 @@ const _pRecur = ( thisId, thisStr ) => {
   }
 }
   
-const getAll = async () => {
+const _getAll = async () => {
   if (!_allFiles.ids) {
-    const rl = await list()
+    const rl = await list().catch( throwErr )
     _allFiles.ids = rl.files.reduce( (a,c) => { a[c.id]=c; return a}, {} )
     _pRecur( rl.root_file_id, '' )
   }
   return _allFiles
+}
+
+const infoFromPath = async p => {
+  const a = await _getAll()
+  return (p in a.paths) ? a.paths[p] : null
+}
+
+const infoFromId = async id => {
+  const a = await _getAll()
+console.dir(a)
+  return (id in a.ids) ? a.ids[id] : null
+}
+
+const infoFromIdArray = async idArray => {
+  const a = await _getAll()
+  return idArray.map( id => (id in a.ids) ? a.ids[id] : null )
 }
 
 ////////////////////////////////////////////////////
@@ -90,7 +106,7 @@ const createItem = async (pId, name, ntype = 'document') => {
   const r = await create(b).catch( throwErr )
   if (r._code != 'Ok') {
     console.log(r)
-    u.fatalErr('failed to make ',name)
+    throwErr('failed to make ',name)
   }
   return r.created[0] // ? must have created one
 }
@@ -185,7 +201,7 @@ t.deleteArray = async (fileId, idArray) => {
 
 module.exports = {
   list, get, change, create,  // low-level dynalist
-  getAll, createItem, // new use cases
+  infoFromPath, infoFromId, infoFromIdArray, createItem, // new use cases
   tf,  // text formatting
   j, t
 }
