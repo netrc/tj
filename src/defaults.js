@@ -35,6 +35,9 @@ if (!Names) {
   Names.projPath = (p = Names.currentProject) => `${Names.projTopPath()}/${p}`
   Names.projTodoPath = p => `${Names.projPath(p)}/${Names.TodoDocument}`
   Names.projDonePath = p => `${Names.projPath(p)}/${Names.DoneDocument}`
+
+  Names.journalTopPath = () => `/${Names.JournalFolder}`
+  Names.journalYMPath = ymStr => `${Names.journalTopPath()}/${ymStr}`
 }
 
 module.exports = Names
