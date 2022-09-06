@@ -9,45 +9,31 @@ const t_add = async av => {
     console.log('t: nothing to add')
     return
   }
-  //console.log('t_add: ', av.restOfString)
-  const rl = await dyn.list().catch( u.fatalErr )
-  //console.log('t_add', Names)
-  const projTodo = await dyn.findFile( rl, rl.root_file_id,[Names.ProjectFolder, Names.currentProject], Names.TodoDocument )
-  const todoContent = await dyn.t.get(projTodo.id).catch( u.fatalErr )
+  const all = await dyn.getAll().catch( u.fatalErr )
+  const thisProjTodo = all.paths[Names.projTodoPath()]
+  // TODO if !thisProjTodo
+  const todoContent = await dyn.t.get(thisProjTodo.id).catch( u.fatalErr )
+  // TODO if !todoContent
   const currentNode = todoContent.nodes.filter( n => n.content==Names.todoInsertNodeName ) 
   if (currentNode.length==0) {
     u.fatalErr(`can't find ${Names.todoInsertNodeName} node`)
   }
   const makeCheckbox = true
   const dontCheck = false
-  //const r = await dyn.t.insert( projTodo.id, av.restOfString, currentNode[0].id, makeCheckbox, dontCheck ).catch( u.fatalErr )
-  const r = await dyn.t.insertArray( projTodo.id, [av.restOfString], currentNode[0].id, makeCheckbox, dontCheck ).catch( u.fatalErr )
+  const r = await dyn.t.insertArray( thisProjTodo.id, [av.restOfString], currentNode[0].id, makeCheckbox, dontCheck ).catch( u.fatalErr )
 }
 
 const t_listp = async av => {
   //console.log('doing t_listp')
-  const rl = await dyn.list().catch( u.fatalErr )
-  const projFolder = dyn.searchFileList( rl, Names.ProjectFolder, 'folder' )
-  //console.dir(projFolder)
-  if (projFolder.length == 0) {
+  const all = await dyn.getAll().catch( u.fatalErr )
+  const projFolder = all.paths[Names.projTopPath()] || null
+  if (!projFolder) {
     u.fatalErr('cant find Projects folder')
   }
-  // TODO: 'ToFiles' == ToNodes
-  const projChildrenNodes = dyn.mapChildrenToFilesList(rl, projFolder[0].children)
-  //console.dir(projChildrenNodes)  
-  const projects = projChildrenNodes.files.filter( n => n.type=='folder' )
-  const s = projects.length==0 ? 'no projects!' : projects.map( p => p.title ).join('\n')
+  const projChildrenNodes = projFolder.children
+  const projects = projChildrenNodes.map( n => all.ids[n].title )
+  const s = projects.length==0 ? 'no projects!' : projects.join('\n')
   console.log(s)
-}
-
-const t_createp = async av => {
-  if (av._.length == 0) {
-    u.fatalErr('must specify project name')
-  }
-  const newpName = av._[0]
-  l.info(`doing t_listp: new project: ${newpName}`)
-  // !! projects must be unique across all dynalist folders !!!!
-  const newp = await dyn.getFileInfoOrCreate(newpName, Names.ProjectFolder, 'folder').catch( u.fatalErr )
 }
 
 const nToText = n => (n.checked ? 'DONE: ' : '      ') + n.content  // e.g. 'some todo item', or 'DONE: item thats done'
@@ -56,10 +42,9 @@ const nDoneToText = n => (n.checked ? n.content : null) // e.g. just the Done it
 const t_show = async av => {
   l.info(`doing t_show`)
   // TODO: see t_done - common get Projects/TJPROJ/Todo  ; get current node
-  const rl = await dyn.list().catch( u.fatalErr )
-  const projTodo = await dyn.findFile( rl, rl.root_file_id,[Names.ProjectFolder, Names.currentProject], Names.TodoDocument )
-
-  const todoContent = await dyn.t.get(projTodo.id).catch( u.fatalErr )
+  const all = await dyn.getAll().catch( u.fatalErr )
+  const thisProjTodo = all.paths[Names.projTodoPath()]
+  const todoContent = await dyn.t.get(thisProjTodo.id).catch( u.fatalErr )
   //console.dir(todoContent) ; console.log('======================')
   const todoNodeTitles = todoContent.nodes.reduce( (o,n) => {o[n.id] = nToText(n);return o}, {} ) // all the todo lines
   //console.log(todoNodeTitles);  console.log('======================')
@@ -118,11 +103,13 @@ const t_done = async av => {
   }
 }
 
+const t_create = require('./todo_create.js')
+
 const t_copts = {
   t: {
     _d: t_add,
     '@list': t_listp,                // list projects
-    '@create': t_createp,            // create a project
+    '@create': t_create,            // create a project
     '@show': t_show,                 // show current project Current
     '@done': t_done,                 // move done to Done
     '@set': u.dummy('t set project')     // set default project
