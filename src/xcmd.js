@@ -27,7 +27,7 @@ const x_argv = async av => {
   
 const x_copts = {
   x: {
-    _d: x_writeList,
+    _d: x_argv,
     '@content': x_content,
     '@names': x_names,
     '@argv': x_argv,
