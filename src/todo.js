@@ -34,23 +34,7 @@ const t_listp = async av => {
   console.log(s)
 }
 
-const nToText = n => (n.checked ? 'DONE: ' : '      ') + n.content  // e.g. 'some todo item', or 'DONE: item thats done'
 const nDoneToText = n => (n.checked ? n.content : null) // e.g. just the Done items
-
-const t_show = async av => {
-  l.info(`doing t_show`)
-  // TODO: see t_done - common get Projects/TJPROJ/Todo  ; get current node
-  const thisProjTodo = await dyn.infoFromPath(Names.projTodoPath())
-  const todoContent = await dyn.t.get(thisProjTodo.id).catch( u.fatalErr )
-  //console.dir(todoContent) ; console.log('======================')
-  const todoNodeTitles = todoContent.nodes.reduce( (o,n) => {o[n.id] = nToText(n);return o}, {} ) // all the todo lines
-  //console.log(todoNodeTitles);  console.log('======================')
-
-  const currentNode = todoContent.nodes.filter( n => n.content==Names.todoCurrentNodeName )[0]  // should be array sz 1
-  //console.dir(currentNode); console.log('======================')
-  const s = currentNode.children.length==0 ? 'nothing CURRENT' : currentNode.children.map( c => todoNodeTitles[c] ).join('\n')
-  console.log(s)
-}
 
 const t_done = async av => {
   l.info(`doing t_done`)
@@ -98,6 +82,7 @@ const t_done = async av => {
 }
 
 const t_create = require('./todo_create.js')
+const t_show = require('./todo_show.js')
 
 const t_copts = {
   t: {
