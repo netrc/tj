@@ -1,9 +1,11 @@
 #%Module
 
 set TJVER 1.0
-set MAIN /home/ric/src/tj/main.js
 
-# require unix or doppler ?
+# expects TJROOT to be set 
+set MAIN [set ::env(TJROOT)]/main.js
+
+# using doppler.com to store secrets
 
 set-alias tj "doppler run -- node --no-warnings ${MAIN} -j"
 set-alias t "doppler run -- node --no-warnings ${MAIN} -t"
