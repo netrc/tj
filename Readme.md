@@ -3,41 +3,33 @@
 
 Overloaded CLI for managing journal entries and todo lists with GUI/storage handled by [dynalist](https://dynalist.io)
 
-Get your API key from the [developer page](https://dynalist.io/developer); need to set that as DYNALIAST_API env var
+# Setup
+
+This works with free tier of dynalist - Get your API key from the [developer page](https://dynalist.io/developer); need to set that as DYNALIAST_API env var.
+
+In your dynalist, create folders 'Journal' and 'Projects'. (can be overridden in ~/.tj.json)
+
+Once you've created a named project folder, you can set TJPROJ environment variable (or in ~/.tj.json). 
+
+With various todo text entered, you can interact with the CURRENT and BACKLOG checkboxed list of items as you want via the dynalist GUI. The only actions the CLI does are insert into BACKLOG section, and, with the @done sub-command, move checked items from CURRENT to the DONE document.
+
+Any other text, notes, commments are untouched.
 
 # CLI
 
-j whatever text you want  // add timestamped text to this months journal entry
+See help for the command options; here, using aliases (in modfile.tj) to simplify:
 
-j -l  // show current months journal entry
+```
+$ tj  worked on tj code // add timestamped text to this months journal doc, created as needed
 
-j -g regex  // grep in this months journal
+$ t @create projectName // creates a named project folder, with Todo and Done docs
 
-t -p projName fix typos and stuff  // set current project and add text
-  // current project stored in json object ~/.tj.json
+$ t something to do     // adds text to top of current project todo
 
-t something to do // adds text to top of current project todo
-  // if no current project, lists projects
+$ t @done             // reads Todo, moves CURRENT items that are checked to DONE folder
 
-t -d something that i just fixed  // adds text, marked as done
-
-t -l // show current project todo
-
-t -e  // dump current project todo to EDITOR // and then what?????   DONE ??
-
-# Setup
-
-DYNALIST_API - your dynalist API key (where to find this....)
-
-Create Journal, Projects folder. 
-
-`j using tj cli` will add to Journal/YYYY-MM document
-
-`t --create projName` will init a project
-`t note something to do` in that projName
-
-Note, j and t are my usual shell aliases,  see modfile.tj
-
+$ t @list           // shows list of current projects
+```
 
 
 # Alternatives
