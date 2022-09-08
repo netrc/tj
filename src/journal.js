@@ -6,8 +6,7 @@ const Names = require('./defaults.js')
 
 const j_add = async av => {
   if (av.restOfString.length == 0) {
-    console.log('j: nothing to add')
-    return
+    return 'j: nothing to add'
   }
 
   const jInfo = await dyn.infoFromPath(Names.journalTopPath()) // must!? be there

@@ -7,6 +7,7 @@
 ///  ... the '-a' command can have sub-commands, the first word after
 
 const l = require('./log.js')
+const u = require('./utils.js')
 
 const parseAndDo = commands => {
   const commandKeys = Object.keys(commands)
@@ -16,25 +17,23 @@ const parseAndDo = commands => {
     boolean: commandKeys
   }
   var av = require('minimist')(process.argv.slice(2),opts)
-  //console.log(av)
+  l.debug(av)
 
   if ( ! commandKeys.map(k => av[k]).some(x => x) ) { // must have one of the command keys
-    console.error(`at least one of ${commandKeys.map(c => `-${c}`).join(', ')}`)
-    process.exit(1)
+    u.fatalErr(`at least one of ${commandKeys.map(c => `-${c}`).join(', ')}`)
   }
 
-  commandKeys.forEach( c => {
-    if (av[c]) { // ok, the command 'c' is to be run
-      var comm = commands[c]._d // default subcommand
-      if (av._.length>0 && commands[c][av._[0]]) {
-        comm = commands[c][av._[0]] // oh, this subcommand
-        av._.shift()
-      }
-      l.info(`coptions: doing ${c}`)
-      av.restOfString = av._.join(' ')
-      comm(av)
+  const c = commandKeys.filter( k => av[k] )[0]
+  if (av[c]) { // ok, the command 'c' is to be run
+    var comm = commands[c]._d // default subcommand
+    if (av._.length>0 && commands[c][av._[0]]) {
+      comm = commands[c][av._[0]] // oh, this subcommand
+      av._.shift()
     }
-  }) // or map commandKeys to array of funcs or nulls; and do first (only) func
+  av.restOfString = av._.join(' ')
+  l.info(`coptions: doing ${c}`)
+  return comm(av) // command output to main
+  }
 }
 
 module.exports = {

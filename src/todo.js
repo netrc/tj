@@ -6,8 +6,7 @@ const Names = require('./defaults.js')
 
 const t_add = async av => {
   if (av.restOfString.length == 0) {
-    console.log('t: nothing to add')
-    return
+    return 't: nothing to add'
   }
   const thisProjTodo = await dyn.infoFromPath(Names.projTodoPath())
   // TODO if !thisProjTodo
@@ -23,30 +22,30 @@ const t_add = async av => {
 }
 
 const t_listp = async av => {
-  //console.log('doing t_listp')
   const projFolder = await dyn.infoFromPath(Names.projTopPath())
   if (!projFolder) {
     u.fatalErr('cant find Projects folder')
   }
   const projectsInfo = await dyn.infoFromIdArray( projFolder.children )
   const projects = projectsInfo.map( i => i.title )
-  const s = projects.length==0 ? 'no projects!' : projects.join('\n')
-  console.log(s)
+  const retStr = projects.length==0 ? 'no projects!' : projects.join('\n')
+  return retStr
 }
 
 const nDoneToText = n => (n.checked ? n.content : null) // e.g. just the Done items
 
 const t_done = async av => {
-  l.info(`doing t_done`)
+  l.debug(`enter t_done`)
   const projTodo = await dyn.infoFromPath(Names.projTodoPath())
   const projDone = await dyn.infoFromPath(Names.projDonePath())
   const todoContent = await dyn.t.get(projTodo.id).catch( u.fatalErr )
-  //console.dir(todoContent)
+  l.debug(todoContent)
   const todoNodeInfo = todoContent.nodes.reduce( (o,n) => {o[n.id] = n;return o}, {} ) // all the todo info
   const currentNode = todoContent.nodes.filter( n => n.content==Names.todoCurrentNodeName )[0]
   const allDone = currentNode.children.map( c => todoNodeInfo[c] ).filter( n=> n.checked )
+  let retStr = null
   if (allDone.length==0) {
-    console.log('nothing done')
+    retStr = 'nothing done'
   } else {
     //console.dir(allDone) // array of allDone items
     const doneContent = await dyn.t.get(projDone.id).catch( u.fatalErr )
@@ -79,6 +78,7 @@ const t_done = async av => {
       //console.dir(r2)
     }
   }
+  return retStr
 }
 
 const t_create = require('./todo_create.js')

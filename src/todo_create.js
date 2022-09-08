@@ -52,7 +52,7 @@ const t_create = async av => {
   const todoDocId = await dyn.createItem(newpId, Names.TodoDocument).catch( u.fatalErr )
   newTodoContent.file_id = todoDocId
   const r = await dyn.change(newTodoContent)
-  console.log('r',r)
+  l.debug('r',r)
 }
 
 module.exports = t_create

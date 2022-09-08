@@ -7,22 +7,27 @@ const fs = require('fs')
 
 const x_writeList = async av => {
   const rl = await dyn.list().catch( u.fatalErr )
-  fs.writeFileSync('./rl.json', JSON.stringify(rl),null,2)
+  return JSON.stringify(rl,null,2)
 }
 
 const x_content = async av => {
-  const fInfo = await dyn.infoFromPath[av.restOfString]
-  console.log('f: ', av.restOfString, fInfo)
-  const content = await dyn.get({file_id: fInfo.id}).catch( u.fatalErr )
-  console.log('content', content)
+  const fInfo = await dyn.infoFromPath(av.restOfString)
+  l.debug('x_content ', av.restOfString, '  fInfo', fInfo)
+  let content = null
+  if (fInfo && ('id' in fInfo)) {
+    content = await dyn.get({file_id: fInfo.id}).catch( u.fatalErr )
+  } else {
+    u.fatalErr(`can't find content for ${av.restOfString}`)
+  }
+  return content
 }
 
 const x_names = async av => {
-  console.dir(Names)
+  return JSON.stringify(Names,null,2)
 }
 
 const x_argv = async av => {
-  console.dir(av)
+  return JSON.stringify(av,null,2)
 }
   
 const x_copts = {

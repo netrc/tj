@@ -1,9 +1,9 @@
 
 const { Logtail } = require('@logtail/node')
+const u = require('./utils.js')
 
 if (!process.env.LOGTAIL_API) {
-  console.error('must set LOGTAIL_API')
-  process.exit(1)
+  u.fatalErr('must set LOGTAIL_API')
 }
 
 var l = {}

@@ -25,7 +25,7 @@ usage:
   tj -x @argv       // dev option, prints out parsed av struct
 `
 
-const doHelp = () => console.log(helpStr)
+const doHelp = () => { return helpStr }
 
 const copts = { // command options
   h: {

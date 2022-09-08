@@ -59,10 +59,12 @@ const _pRecur = ( thisId, thisStr ) => {
 }
   
 const _getAll = async () => {
+  l.log('_getAll')
   if (!_allFiles.ids) {
     const rl = await list().catch( throwErr )
     _allFiles.ids = rl.files.reduce( (a,c) => { a[c.id]=c; return a}, {} )
     _pRecur( rl.root_file_id, '' )
+    l.debug('_getAll now with ', Object.keys(_allFiles.paths).length, ' names')
   }
   return _allFiles
 }
@@ -74,7 +76,7 @@ const infoFromPath = async p => {
 
 const infoFromId = async id => {
   const a = await _getAll()
-console.dir(a)
+  l.debug(a)
   return (id in a.ids) ? a.ids[id] : null
 }
 
@@ -100,10 +102,10 @@ const createItem = async (pId, name, ntype = 'document') => {
       index: 0
     } ]
   }
-  console.log(`createItem: creating for ${name}`,b)
+  l.debug(`createItem: creating for ${name}`,b)
   const r = await create(b).catch( throwErr )
   if (r._code != 'Ok') {
-    console.log(r)
+    l.debug(r)
     throwErr('failed to make ',name)
   }
   return r.created[0] // ? must have created one
