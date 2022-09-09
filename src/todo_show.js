@@ -14,6 +14,9 @@ const t_show = async av => {
   l.info(`doing t_show`)
   // TODO: see t_done - common get Projects/TJPROJ/Todo  ; get current node
   const thisProjTodo = await dyn.infoFromPath(Names.projTodoPath())
+  if (! thisProjTodo) {
+    u.fatalErr(`can't find ${Names.projTodoPath()}`)
+  }
   const todoContent = await dyn.t.get(thisProjTodo.id).catch( u.fatalErr )
   //l.debug(todoContent)
   // all the todo lines

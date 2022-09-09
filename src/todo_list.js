@@ -7,7 +7,7 @@ const Names = require('./defaults.js')
 const t_list = async av => {
   const projFolder = await dyn.infoFromPath(Names.projTopPath())
   if (!projFolder) {
-    u.fatalErr('cant find Projects folder')
+    u.fatalErr('cant find ${Names.projTopPath()} folder')
   }
   const projectsInfo = await dyn.infoFromIdArray( projFolder.children )
   const projects = projectsInfo.map( i => i.title )

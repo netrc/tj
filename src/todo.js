@@ -9,12 +9,15 @@ const t_add = async av => {
     return 't: nothing to add'
   }
   const thisProjTodo = await dyn.infoFromPath(Names.projTodoPath())
+  if (! thisProjTodo) {
+    u.fatalErr(`${Names.projTodoPath()} not found`)
+  }
   // TODO if !thisProjTodo
   const todoContent = await dyn.t.get(thisProjTodo.id).catch( u.fatalErr )
   // TODO if !todoContent
   const currentNode = todoContent.nodes.filter( n => n.content==Names.todoInsertNodeName ) 
   if (currentNode.length==0) {
-    u.fatalErr(`can't find ${Names.todoInsertNodeName} node`)
+    u.fatalErr(`can't find ${Names.thisProjToto} : ${Names.todoInsertNodeName} node`)
   }
   const makeCheckbox = true
   const dontCheck = false

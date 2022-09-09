@@ -9,7 +9,13 @@ const nDoneToText = n => (n.checked ? n.content : null) // e.g. just the Done it
 const t_done = async av => {
   l.debug(`enter t_done`)
   const projTodo = await dyn.infoFromPath(Names.projTodoPath())
+  if (! projTodo) {
+    u.fatalErr(`can't find ${Names.projTodoPath()}`)
+  }
   const projDone = await dyn.infoFromPath(Names.projDonePath())
+  if (! projDone) {
+    u.fatalErr(`can't find ${Names.projDonePath()}`)
+  }
   const todoContent = await dyn.t.get(projTodo.id).catch( u.fatalErr )
   l.debug(todoContent)
   const todoNodeInfo = todoContent.nodes.reduce( (o,n) => {o[n.id] = n;return o}, {} ) // all the todo info
