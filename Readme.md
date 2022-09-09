@@ -31,6 +31,20 @@ $ t @done             // reads Todo, moves CURRENT items that are checked to DON
 $ t @list           // shows list of current projects
 ```
 
+# Notes
+
+Version 0.4
+
+You can use environment variable ```TJPROJ``` to set the current project name or
+```$HOME/.tj.json``` in the object key ```currentProject```.
+
+Precedence of project names
+* command line, -p projName, over-rides...
+  * environment variable TJPROJ, over-rides...
+    * $HOME/.tj.json  ```{ "currentProject": "projName" }```
+
+
+
 
 # Alternatives
 random notes on how I got here...
